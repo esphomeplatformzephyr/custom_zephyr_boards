@@ -1,0 +1,6 @@
+board:
+  name: esp32c6_devkitc_n4
+  full_name: ESP32-C6-DevKitC (4MB flash)
+  vendor: espressif
+  socs:
+  - name: esp32c6

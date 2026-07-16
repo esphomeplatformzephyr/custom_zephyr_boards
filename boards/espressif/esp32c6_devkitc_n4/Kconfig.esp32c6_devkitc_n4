@@ -1,0 +1,8 @@
+# ESP32C6 devkitc board configuration, corrected for the 4MB (N4) flash SKU.
+#
+# Copyright (c) 2024 Espressif Systems (Shanghai) Co., Ltd.
+# SPDX-License-Identifier: Apache-2.0
+
+config BOARD_ESP32C6_DEVKITC_N4
+	select SOC_ESP32_C6_WROOM_1U_N4
+	select SOC_ESP32C6_HPCORE if BOARD_ESP32C6_DEVKITC_N4_ESP32C6_HPCORE
