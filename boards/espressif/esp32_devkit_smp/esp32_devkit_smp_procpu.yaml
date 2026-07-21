@@ -1,0 +1,25 @@
+identifier: esp32_devkit_smp/esp32/procpu
+name: ESP32-DevkitC PROCPU (non-AMP partitions)
+type: mcu
+arch: xtensa
+toolchain:
+  - zephyr
+ram: 8192
+supported:
+  - adc
+  - dac
+  - gpio
+  - i2c
+  - i2s
+  - watchdog
+  - uart
+  - nvs
+  - pwm
+  - spi
+  - counter
+  - entropy
+  - input
+  - crypto
+  - retained_mem
+  - netif:wifi
+vendor: espressif

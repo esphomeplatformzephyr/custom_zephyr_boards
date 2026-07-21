@@ -1,0 +1,6 @@
+board:
+  name: esp32_devkit_smp
+  full_name: ESP32-DevKitC (non-AMP partition table)
+  vendor: espressif
+  socs:
+  - name: esp32
