@@ -1,5 +1,5 @@
 board:
-  name: esp32_devkit_smp
+  name: esp32_devkit_procpu_only
   full_name: ESP32-DevKitC (non-AMP partition table)
   vendor: espressif
   socs:

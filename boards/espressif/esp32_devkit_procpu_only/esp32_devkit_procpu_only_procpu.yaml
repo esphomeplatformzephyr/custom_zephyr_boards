@@ -1,4 +1,4 @@
-identifier: esp32_devkit_smp/esp32/procpu
+identifier: esp32_devkit_procpu_only/esp32/procpu
 name: ESP32-DevkitC PROCPU (non-AMP partitions)
 type: mcu
 arch: xtensa
