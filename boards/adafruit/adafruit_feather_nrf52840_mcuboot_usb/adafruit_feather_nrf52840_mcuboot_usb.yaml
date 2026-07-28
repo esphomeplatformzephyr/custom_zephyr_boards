@@ -1,0 +1,17 @@
+identifier: adafruit_feather_nrf52840_mcuboot_usb/nrf52840
+name: Adafruit Feather nRF52840 Express (MCUboot + USB CDC-ACM serial recovery)
+type: mcu
+arch: arm
+toolchain:
+  - zephyr
+  - gnuarmemb
+supported:
+  - adc
+  - usbd
+  - ble
+  - watchdog
+  - counter
+  - feather_serial
+  - feather_i2c
+  - feather_spi
+vendor: adafruit

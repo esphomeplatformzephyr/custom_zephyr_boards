@@ -47,16 +47,40 @@ flash SKU. Upstream's board definition assumes a larger flash size; boards
 in this repo select `SOC_ESP32_C6_WROOM_1U_N4` so the flash partition table
 matches the actual chip.
 
+### adafruit_feather_nrf52840_mcuboot_usb
+
+Same hardware as upstream's `adafruit_feather_nrf52840`, corrected for
+MCUboot with USB CDC-ACM serial recovery. Upstream's stock partition table
+gives `boot_partition` only 48 KB, which doesn't fit MCUboot once the USB
+CDC-ACM stack and ECDSA-P256 signing are linked in (measured overflow during
+hardware bring-up was ~12 KB even with ECDSA-P256, which is far smaller than
+the default RSA-2048). `boot_partition` is grown to 60 KB here, matching the
+ESP32-family variants' own `boot_partition` convention (see
+`partitions_0x1000_default_8M.dtsi`'s `DT_SIZE_K(60)`) rather than picking an
+arbitrary size -- confirmed by an actual build that this leaves only 380
+bytes to spare (61,060 / 61,440 bytes, 99.38% used), so it's tight but real.
+4 KB is taken from each of the two app slots (`slot0`/`slot1`, now 470 KB
+each instead of 472 KB); `storage_partition` is untouched. No
+`scratch_partition` is defined -- the `move` and `offset` MCUboot swap
+methods don't need one, and this board's default OTA swap method is
+`offset`, not `scratch`.
+
+The board also declares a USB CDC-ACM devicetree node (`zephyr,cdc-acm-uart`)
+that upstream's board doesn't -- needed for MCUboot's serial recovery to have
+something to talk to. This isn't a new pattern: the sibling
+`adafruit_itsybitsy_nrf52840` board in mainline Zephyr already ships the same
+`#include <../boards/common/usb/cdc_acm_serial.dtsi>` for the same reason.
+
 ## Why these aren't upstream Zephyr boards
 
-Neither board describes different physical hardware from its upstream
-counterpart -- each is the same board with a different Kconfig/devicetree
-default (partition table layout, flash size). Zephyr's board-contribution
-process expects that kind of difference to be a **board revision** of the
-existing board (e.g. `esp32_devkitc@procpu_only`), not a separate board
-directory -- but a revision has to live inside the same board directory as
-the board it revises, which means editing the in-tree `esp32_devkitc`/
-`esp32c6_devkitc` board files directly. That requires a Zephyr fork, not an
-out-of-tree `BOARD_ROOT`. Keeping these as standalone out-of-tree boards
-here avoids that fork for what is otherwise a one-file Kconfig/partition
-difference.
+None of these boards describe different physical hardware from their
+upstream counterpart -- each is the same board with a different
+Kconfig/devicetree default (partition table layout, flash size). Zephyr's
+board-contribution process expects that kind of difference to be a **board
+revision** of the existing board (e.g. `esp32_devkitc@procpu_only`), not a
+separate board directory -- but a revision has to live inside the same board
+directory as the board it revises, which means editing the in-tree
+`esp32_devkitc`/`esp32c6_devkitc`/`adafruit_feather_nrf52840` board files
+directly. That requires a Zephyr fork, not an out-of-tree `BOARD_ROOT`.
+Keeping these as standalone out-of-tree boards here avoids that fork for
+what is otherwise a one-file Kconfig/partition difference.
