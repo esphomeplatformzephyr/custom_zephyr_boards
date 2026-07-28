@@ -54,16 +54,16 @@ MCUboot with USB CDC-ACM serial recovery. Upstream's stock partition table
 gives `boot_partition` only 48 KB, which doesn't fit MCUboot once the USB
 CDC-ACM stack and ECDSA-P256 signing are linked in (measured overflow during
 hardware bring-up was ~12 KB even with ECDSA-P256, which is far smaller than
-the default RSA-2048). `boot_partition` is grown to 60 KB here, matching the
-ESP32-family variants' own `boot_partition` convention (see
-`partitions_0x1000_default_8M.dtsi`'s `DT_SIZE_K(60)`) rather than picking an
-arbitrary size -- confirmed by an actual build that this leaves only 380
-bytes to spare (61,060 / 61,440 bytes, 99.38% used), so it's tight but real.
-4 KB is taken from each of the two app slots (`slot0`/`slot1`, now 470 KB
-each instead of 472 KB); `storage_partition` is untouched. No
-`scratch_partition` is defined -- the `move` and `offset` MCUboot swap
-methods don't need one, and this board's default OTA swap method is
-`offset`, not `scratch`.
+the default RSA-2048). A 60 KB `boot_partition` (matching the ESP32-family
+variants' own convention -- see `partitions_0x1000_default_8M.dtsi`'s
+`DT_SIZE_K(60)`) was tried first and confirmed by an actual build to link,
+but with only 380 bytes to spare (61,060 / 61,440 bytes, 99.38% used) -- too
+thin a margin to be worth saving 4 KB over. `boot_partition` is grown to
+64 KB instead, with 8 KB taken from each of the two app slots (`slot0`/
+`slot1`, now 464 KB each instead of 472 KB); `storage_partition` is
+untouched. No `scratch_partition` is defined -- the `move` and `offset`
+MCUboot swap methods don't need one, and this board's default OTA swap
+method is `offset`, not `scratch`.
 
 The board also declares a USB CDC-ACM devicetree node (`zephyr,cdc-acm-uart`)
 that upstream's board doesn't -- needed for MCUboot's serial recovery to have

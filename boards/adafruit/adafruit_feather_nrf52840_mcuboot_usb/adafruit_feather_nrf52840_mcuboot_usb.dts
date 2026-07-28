@@ -35,12 +35,13 @@
  * <nordic/nrf52840_partition.dtsi>) doesn't fit MCUboot once the USB CDC-ACM
  * serial-recovery stack and ECDSA-P256 signing are linked in -- measured
  * overflow during hardware bring-up was ~12 KB even with ECDSA-P256 (much
- * smaller than the default RSA-2048). Grown to 60 KB here, matching the
- * ESP32-family variants' own boot_partition convention (see
- * partitions_0x1000_default_8M.dtsi's DT_SIZE_K(60)), with 4 KB taken from
- * each of the two 472 KB app slots (now 470 KB each). storage_partition is
- * untouched. No scratch_partition -- swap_method offset/move don't need one,
- * and scratch isn't used by this board's default OTA config.
+ * smaller than the default RSA-2048). A 60 KB boot_partition (matching the
+ * ESP32-family variants' own convention) links with only 380 bytes to spare,
+ * which is too thin a margin to be worth saving 4 KB over -- grown to 64 KB
+ * instead, with 8 KB taken from each of the two 472 KB app slots (now 464 KB
+ * each). storage_partition is untouched. No scratch_partition -- swap_method
+ * offset/move don't need one, and scratch isn't used by this board's default
+ * OTA config.
  */
 &flash0 {
 	partitions {
@@ -51,19 +52,19 @@
 		boot_partition: partition@0 {
 			compatible = "zephyr,mapped-partition";
 			label = "mcuboot";
-			reg = <0x00000000 0x0000f000>;
+			reg = <0x00000000 0x00010000>;
 		};
 
-		slot0_partition: partition@f000 {
+		slot0_partition: partition@10000 {
 			compatible = "zephyr,mapped-partition";
 			label = "image-0";
-			reg = <0x0000f000 0x00074800>;
+			reg = <0x00010000 0x00074000>;
 		};
 
-		slot1_partition: partition@83800 {
+		slot1_partition: partition@84000 {
 			compatible = "zephyr,mapped-partition";
 			label = "image-1";
-			reg = <0x00083800 0x00074800>;
+			reg = <0x00084000 0x00074000>;
 		};
 
 		/*
