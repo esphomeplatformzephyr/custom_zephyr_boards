@@ -40,13 +40,6 @@ for why SMP has never been reliable on Xtensa ESP32). Using upstream's AMP
 partition table would waste flash on an appcpu partition that's never
 flashed or used.
 
-### esp32c6_devkitc_n4
-
-Same hardware as upstream's `esp32c6_devkitc`, corrected for the 4MB (N4)
-flash SKU. Upstream's board definition assumes a larger flash size; boards
-in this repo select `SOC_ESP32_C6_WROOM_1U_N4` so the flash partition table
-matches the actual chip.
-
 ### adafruit_feather_nrf52840_mcuboot_usb
 
 Same hardware as upstream's `adafruit_feather_nrf52840`, corrected for
@@ -80,7 +73,7 @@ board-contribution process expects that kind of difference to be a **board
 revision** of the existing board (e.g. `esp32_devkitc@procpu_only`), not a
 separate board directory -- but a revision has to live inside the same board
 directory as the board it revises, which means editing the in-tree
-`esp32_devkitc`/`esp32c6_devkitc`/`adafruit_feather_nrf52840` board files
+`esp32_devkitc`/`adafruit_feather_nrf52840` board files
 directly. That requires a Zephyr fork, not an out-of-tree `BOARD_ROOT`.
 Keeping these as standalone out-of-tree boards here avoids that fork for
 what is otherwise a one-file Kconfig/partition difference.
