@@ -1,6 +1,0 @@
-board:
-  name: adafruit_feather_nrf52840_mcuboot_usb
-  full_name: Feather nRF52840 Express (MCUboot + USB CDC-ACM serial recovery)
-  vendor: adafruit
-  socs:
-    - name: nrf52840
