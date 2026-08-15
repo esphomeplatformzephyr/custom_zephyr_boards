@@ -1,0 +1,15 @@
+identifier: arduino_nano_r4
+name: Arduino Nano R4
+type: mcu
+arch: arm
+toolchain:
+  - zephyr
+  - gnuarmemb
+ram: 32
+supported:
+  - adc
+  - gpio
+  - i2c
+  - pwm
+  - spi
+  - uart

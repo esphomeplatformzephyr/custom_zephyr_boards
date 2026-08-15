@@ -1,0 +1,245 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/dts-v1/;
+
+#include <renesas/ra/ra4/r7fa4m1ab3cfm.dtsi>
+#include "arduino_nano_r4-pinctrl.dtsi"
+#include <zephyr/dt-bindings/gpio/gpio.h>
+#include <zephyr/dt-bindings/adc/adc.h>
+
+/ {
+	model = "Arduino Nano R4";
+	compatible = "renesas,ra4m1", "renesas,ra";
+
+	chosen {
+		zephyr,console = &uart2;
+		zephyr,shell-uart = &uart2;
+		zephyr,sram = &sram0;
+		zephyr,flash = &flash0;
+		zephyr,entropy = &trng;
+		zephyr,code-partition = &code_partition;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		led: led {
+			gpios = <&ioport2 4 GPIO_ACTIVE_HIGH>;
+		};
+	};
+
+	aliases {
+		led0 = &led;
+		watchdog0 = &wdt;
+	};
+};
+
+&sci2 {
+	status = "okay";
+	pinctrl-0 = <&sci2_default>;
+	pinctrl-names = "default";
+	interrupts = <0 1>, <1 1>, <2 1>, <3 1>;
+	interrupt-names = "rxi", "txi", "tei", "eri";
+
+	uart2: uart {
+		current-speed = <115200>;
+		status = "okay";
+	};
+};
+
+&ioport0 {
+	status = "okay";
+};
+
+&ioport1 {
+	status = "okay";
+};
+
+&ioport2 {
+	status = "okay";
+};
+
+&ioport3 {
+	status = "okay";
+};
+
+&ioport4 {
+	status = "okay";
+};
+
+&adc0 {
+	status = "okay";
+	pinctrl-0 = <&adc0_default>;
+	pinctrl-names = "default";
+};
+
+&dac0 {
+	pinctrl-0 = <&dac0_default>;
+	pinctrl-names = "default";
+	status = "okay";
+};
+
+&iic1 {
+	pinctrl-0 = <&iic1_default>;
+	pinctrl-names = "default";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	clock-frequency = <DT_FREQ_K(400)>;
+	interrupts = <10 1>, <11 1>, <12 1>, <13 1>;
+	interrupt-names = "rxi", "txi", "tei", "eri";
+	status = "okay";
+};
+
+&iic0 {
+	pinctrl-0 = <&iic0_default>;
+	pinctrl-names = "default";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	clock-frequency = <DT_FREQ_K(400)>;
+	interrupts = <14 1>, <15 1>, <16 1>, <17 1>;
+	interrupt-names = "rxi", "txi", "tei", "eri";
+	status = "okay";
+};
+
+&spi1 {
+	pinctrl-0 = <&spi1_default>;
+	pinctrl-names = "default";
+	interrupts = <28 1>, <29 1>, <30 1>, <31 1>;
+	interrupt-names = "rxi", "txi", "tei", "eri";
+	status = "okay";
+};
+
+&pwm0 {
+	pinctrl-0 = <&pwm0_default>;
+	pinctrl-names = "default";
+	interrupts = <4 1>, <5 1>;
+	interrupt-names = "gtioca", "overflow";
+	status = "okay";
+};
+
+&pwm1 {
+	pinctrl-0 = <&pwm1_default>;
+	pinctrl-names = "default";
+	interrupts = <6 1>, <7 1>;
+	interrupt-names = "gtioca", "overflow";
+	status = "okay";
+};
+
+&pwm2 {
+	pinctrl-0 = <&pwm2_default>;
+	pinctrl-names = "default";
+	interrupts = <18 1>, <19 1>;
+	interrupt-names = "gtioca", "overflow";
+	status = "okay";
+};
+
+&pwm7 {
+	pinctrl-0 = <&pwm7_default>;
+	pinctrl-names = "default";
+	interrupts = <8 1>, <9 1>;
+	interrupt-names = "gtioca", "overflow";
+	status = "okay";
+};
+
+&usbfs {
+	pinctrl-0 = <&usbfs_default>;
+	pinctrl-names = "default";
+	maximum-speed = "full-speed";
+	status = "okay";
+
+	zephyr_udc0: udc {
+		status = "okay";
+	};
+};
+
+&trng {
+	status = "okay";
+};
+
+&wdt {
+	status = "okay";
+};
+
+/* Nothing populates OSIS on this board -- leaving it "okay" (the RA4M1 SoC
+ * default) reserves its linker section at its fixed silicon address
+ * (0x01010018), far past the end of code flash. objcopy has to pad every
+ * byte of that gap to flatten the ELF into a single .bin, turning a ~170K
+ * image into a ~16M one -- harmless for pyocd/jlink (which flash .hex/.elf
+ * and handle disjoint regions natively) but breaks dfu-util, which only
+ * understands a single flat .bin. Disabled here since dfu-util is this
+ * board's real flashing path.
+ */
+&option_setting_osis {
+	status = "disabled";
+};
+
+&flash0 {
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		/* Real bootloader size, confirmed via arduino:renesas_uno's own
+		 * memory_regions.ld (FLASH_IMAGE_START = 0x4000) and cross-checked
+		 * against `dfu-util --list`'s reported DFU layout for this exact
+		 * chip ("@CodeFlash /0x00000000/8*2Ka,120*2Kg" -- 8*2K = 0x4000 of
+		 * read-only sectors, writable/erasable sectors only start after
+		 * that). NOT upload.address=0x00010000 from Arduino's boards.txt --
+		 * that value is never actually referenced by the real dfu-util
+		 * upload recipe (tools.dfu-util.upload.pattern), and does not match
+		 * a real, officially-built sketch's own linked entry address.
+		 */
+		boot_partition: partition@0 {
+			label = "bootloader";
+			reg = <0x00000000 0x4000>;
+			read-only;
+		};
+
+		code_partition: partition@4000 {
+			label = "code";
+			reg = <0x4000 0x3c000>;
+			read-only;
+		};
+	};
+};
+
+&hoco {
+	status = "okay";
+	clock-frequency = <48000000>;
+};
+
+&uclk {
+	clocks = <&hoco>;
+	div = <1>;
+	status = "okay";
+};
+
+&pclkblock {
+	clocks = <&hoco>;
+};
+
+&iclk {
+	div = <1>;
+};
+
+&pclka {
+	div = <1>;
+};
+
+&pclkb {
+	div = <2>;
+};
+
+&pclkc {
+	div = <1>;
+};
+
+&pclkd {
+	div = <1>;
+};
+
+&fclk {
+	div = <2>;
+};
