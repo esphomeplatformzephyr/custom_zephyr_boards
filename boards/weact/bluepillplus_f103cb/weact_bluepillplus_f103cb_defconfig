@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: Apache-2.0
+
+# enable uart driver
+CONFIG_SERIAL=y
+# enable console
+CONFIG_CONSOLE=y
+CONFIG_UART_CONSOLE=y
+
+# enable GPIO
+CONFIG_GPIO=y
+
+# board dts redefines code_partition to leave room for storage_partition
+# (see the board's own flash0 node) -- link against the DT-declared
+# partition rather than a fixed platform offset.
+CONFIG_USE_DT_CODE_PARTITION=y

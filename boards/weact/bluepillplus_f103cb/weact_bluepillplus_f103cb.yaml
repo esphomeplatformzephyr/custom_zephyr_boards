@@ -1,0 +1,13 @@
+identifier: weact_bluepillplus_f103cb
+name: WeAct BluePill Plus (STM32F103CBT6)
+type: mcu
+arch: arm
+toolchain:
+  - zephyr
+  - gnuarmemb
+ram: 20
+flash: 128
+supported:
+  - gpio
+  - uart
+  - watchdog

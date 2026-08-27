@@ -1,0 +1,6 @@
+board:
+  name: weact_bluepillplus_f103cb
+  full_name: WeAct BluePill Plus (STM32F103CBT6)
+  vendor: weact
+  socs:
+    - name: stm32f103xb

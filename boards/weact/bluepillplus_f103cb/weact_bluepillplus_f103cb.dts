@@ -1,0 +1,159 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/dts-v1/;
+#include <st/f1/stm32f103Xb.dtsi>
+#include <st/f1/stm32f103c(8-b)tx-pinctrl.dtsi>
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+
+/ {
+	model = "WeAct BluePill Plus (STM32F103CBT6)";
+	compatible = "st,stm32f103cb-weact-bluepillplus";
+
+	chosen {
+		zephyr,console = &usart1;
+		zephyr,shell-uart = &usart1;
+		zephyr,sram = &sram0;
+		zephyr,flash = &flash0;
+		zephyr,code-partition = &code_partition;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		blue_led: led_0 {
+			gpios = <&gpiob 2 GPIO_ACTIVE_HIGH>;
+			label = "Blue LED";
+		};
+	};
+
+	gpio_keys {
+		compatible = "gpio-keys";
+
+		key: button {
+			label = "KEY";
+			gpios = <&gpioa 0 GPIO_ACTIVE_LOW>;
+			zephyr,code = <INPUT_KEY_0>;
+		};
+	};
+
+	aliases {
+		led0 = &blue_led;
+		sw0 = &key;
+		watchdog0 = &iwdg;
+		die-temp0 = &die_temp;
+	};
+};
+
+/* Real crystal, not an ST-Link-fed square wave -- no hse-bypass (unlike
+ * nucleo_f103rb.dts), matches boards/others/stm32f103_mini's own crystal
+ * setup.
+ */
+&clk_hse {
+	clock-frequency = <DT_FREQ_M(8)>;
+	status = "okay";
+};
+
+&pll {
+	mul = <9>;
+	clocks = <&clk_hse>;
+	status = "okay";
+};
+
+&rcc {
+	clocks = <&pll>;
+	clock-frequency = <DT_FREQ_M(72)>;
+	ahb-prescaler = <1>;
+	apb1-prescaler = <2>;
+	apb2-prescaler = <1>;
+};
+
+/* WeAct's HDK lists a real 32.768KHz RTC crystal (unlike nucleo_f103rb,
+ * which has none and clocks its RTC from LSI) -- use it for RTC accuracy.
+ * IWDG still runs off its own always-on internal LSI regardless.
+ */
+&clk_lse {
+	status = "okay";
+};
+
+&clk_lsi {
+	status = "okay";
+};
+
+&usart1 {
+	pinctrl-0 = <&usart1_tx_pa9 &usart1_rx_pa10>;
+	pinctrl-names = "default";
+	current-speed = <115200>;
+	status = "okay";
+};
+
+/* stm32f103Xb.dtsi (this board's SoC density) doesn't declare a usb node --
+ * only stm32f103X8.dtsi (the 64K sibling density) does, even though the
+ * real STM32F103CB die has the identical USB FS device peripheral. Node
+ * definition copied verbatim from that file (same reg/interrupts/clocks --
+ * this is the same peripheral IP on both densities), since Zephyr just
+ * never wired it up for the "Xb" density.
+ */
+/ {
+	soc {
+		usb: usb@40005c00 {
+			compatible = "st,stm32-usb";
+			reg = <0x40005c00 0x400>;
+			interrupts = <20 0>;
+			interrupt-names = "usb";
+			num-bidir-endpoints = <8>;
+			ram-size = <512>;
+			maximum-speed = "full-speed";
+			status = "disabled";
+			clocks = <&rcc STM32_CLOCK(APB1, 23)>;
+			phys = <&usb_fs_phy>;
+		};
+	};
+
+	usb_fs_phy: usbphy {
+		compatible = "usb-nop-xceiv";
+		#phy-cells = <0>;
+	};
+};
+
+zephyr_udc0: &usb {
+	pinctrl-0 = <&usb_dm_pa11 &usb_dp_pa12>;
+	pinctrl-names = "default";
+	status = "okay";
+};
+
+&iwdg {
+	status = "okay";
+};
+
+&rtc {
+	clocks = <&rcc STM32_CLOCK(APB1, 28)>,
+		 <&rcc STM32_SRC_LSE RTC_SEL(1)>;
+	status = "okay";
+};
+
+&die_temp {
+	status = "okay";
+};
+
+/* Whole 128K as one image -- this board has no resident bootloader of its
+ * own (the CPU always resets to address 0), so bootloader: none is the
+ * only sensible default; code_partition covers the full flash minus a
+ * small tail an app-level overlay can carve a storage_partition out of
+ * (see esphome's zephyr component's own overlays: mechanism), same
+ * label-reuse convention as arduino_nano_r4.dts.
+ */
+&flash0 {
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		code_partition: partition@0 {
+			label = "code";
+			reg = <0x0 0x20000>;
+			read-only;
+		};
+	};
+};
