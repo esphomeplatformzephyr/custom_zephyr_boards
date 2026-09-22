@@ -86,11 +86,17 @@ need their own files.
 ## Snippets
 
 A [Zephyr snippet](https://docs.zephyrproject.org/latest/build/snippets/index.html)
-is a reusable, board-independent Kconfig/devicetree fragment -- unlike a board
-here, it doesn't model real hardware, so it belongs in this repo when it's
-something no upstream board declares on its own (e.g. a synthetic devicetree
-node needed only to exercise a Zephyr subsystem that no supported board's real
-hardware backs yet).
+is a reusable, board-independent Kconfig/devicetree/build-flag bundle, applied
+with `-S <name>` (or ESPHome's `snippets:`) across any number of boards at
+once. Upstream Zephyr uses them for all kinds of things -- alternate console
+backends (`rtt-console`, `cdc-acm-console`), debug/trace tooling
+(`ram-tracing`, `silabs-pti`), boot/partition behavior
+(`rp2-boot-mode-retention`, `slot1-partition`), vendor feature bundles
+(`espressif`, `nordic`, `wifi`), and more. A snippet belongs in this repo for
+the same reason a board does: something no upstream Zephyr snippet already
+covers. That includes a synthetic devicetree fixture needed only to exercise
+a subsystem no supported board's real hardware backs yet (`cpu_freq_stub`),
+but isn't limited to that case.
 
 Point an ESPHome `zephyr: snippet_source:` at this repo and select a snippet
 by name:
