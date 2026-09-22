@@ -1,8 +1,8 @@
 # custom_zephyr_boards
 
-Out-of-tree Zephyr board definitions, used as an ESPHome `zephyr: board_source:`
-root so a board works with the stock Zephyr SDK -- no need to fork or patch
-Zephyr itself.
+Out-of-tree Zephyr board definitions and snippets, used as an ESPHome
+`zephyr: board_source:`/`snippet_source:` root so a board or snippet works
+with the stock Zephyr SDK -- no need to fork or patch Zephyr itself.
 
 This repo is currently empty of actual boards. A board that only differs from
 an existing upstream board by a Kconfig/devicetree default -- a corrected
@@ -82,3 +82,44 @@ boards/<vendor>/<board>/
 A board here should be a drop-in replacement for the closest matching upstream board where one exists
 -- same SoC, only the parts that genuinely differ (pinctrl, missing Kconfig symbols, vendor drivers)
 need their own files.
+
+## Snippets
+
+A [Zephyr snippet](https://docs.zephyrproject.org/latest/build/snippets/index.html)
+is a reusable, board-independent Kconfig/devicetree fragment -- unlike a board
+here, it doesn't model real hardware, so it belongs in this repo when it's
+something no upstream board declares on its own (e.g. a synthetic devicetree
+node needed only to exercise a Zephyr subsystem that no supported board's real
+hardware backs yet).
+
+Point an ESPHome `zephyr: snippet_source:` at this repo and select a snippet
+by name:
+
+```yaml
+zephyr:
+  variant: ESP32
+  snippet_source:
+    type: git
+    url: https://github.com/esphomeplatformzephyr/custom_zephyr_boards
+  snippets:
+    - cpu_freq_stub
+```
+
+### Adding a snippet
+
+Each snippet directory follows Zephyr's standard snippet layout:
+
+```
+snippets/<snippet>/
+├── snippet.yml
+├── <snippet>.overlay
+└── README.rst
+```
+
+- **snippet.yml**: `name:` plus an `append:` block naming the overlay/conf file(s) to add
+  (`EXTRA_DTC_OVERLAY_FILE`, `EXTRA_CONF_FILE`, ...), optionally scoped per board under `boards:`.
+  Validated against the pinned SDK's own `scripts/schemas/snippet-schema.yaml` -- an older SDK
+  may reject a field a newer upstream Zephyr's schema allows (e.g. `description:`).
+- **\<snippet\>.overlay**: The devicetree fragment the snippet adds.
+- **README.rst**: What the snippet does and why it exists -- `snippet.yml` itself has no
+  `description:` field on the SDK version this repo currently targets.
