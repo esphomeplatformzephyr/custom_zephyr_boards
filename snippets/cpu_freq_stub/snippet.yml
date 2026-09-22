@@ -1,0 +1,3 @@
+name: cpu_freq_stub
+append:
+  EXTRA_DTC_OVERLAY_FILE: cpu_freq_stub.overlay
