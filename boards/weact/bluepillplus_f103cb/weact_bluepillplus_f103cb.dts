@@ -141,8 +141,7 @@ zephyr_udc0: &usb {
  * own (the CPU always resets to address 0), so bootloader: none is the
  * only sensible default; code_partition covers the full flash minus a
  * small tail an app-level overlay can carve a storage_partition out of
- * (see esphome's zephyr component's own overlays: mechanism), same
- * label-reuse convention as arduino_nano_r4.dts.
+ * (see esphome's zephyr component's own overlays: mechanism).
  */
 &flash0 {
 	partitions {
